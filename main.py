@@ -2,6 +2,7 @@
 import pygame
 import pymunk
 import pymunk.pygame_util
+import numpy as np
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
@@ -17,6 +18,7 @@ options = pymunk.pygame_util.DrawOptions(screen)
 space.gravity = (0,1000)
 space.debug_draw(options)
 THICKNESS = 5
+ball_held = False
 
 
 def create_borders(width,height):
@@ -41,9 +43,12 @@ ball_shape = pymunk.Circle(ball,25,offset=(0,0))
 ball.position = 200,100
 ball_shape.elasticity = 0.9
 space.add(ball,ball_shape)
+timer = 0
+
 while running:
-    dt = 1/60
+    dt = 1/360
     space.step(dt)
+    timer += dt
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
@@ -53,9 +58,22 @@ while running:
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
+            global inital_x, inital_y , initial_velocity
+            initial_x,initial_y = pygame.mouse.get_pos()
+            initial_velocity = np.array(ball.velocity)
             ball.position = mouse_pos
-            ball.velocity = [0,0]
-            
+            ball_held = True
+
+            timer = 0
+        
+        if event.type == pygame.MOUSEBUTTONUP:
+
+            final_x ,final_y = pygame.mouse.get_pos()
+            final_velocity = ((final_x - initial_x) / timer, (final_y- initial_y) / timer ) 
+            ball.velocity = final_velocity
+
+
+            ball_held = False
             
         if event.type == pygame.VIDEORESIZE:
             width,height = event.w, event.h 
@@ -72,11 +90,14 @@ while running:
 
     # RENDER YOUR GAME HERE
     space.debug_draw(options)
+    if ball_held:
+        ball.position = pygame.mouse.get_pos()
+        ball.velocity += [0,0]
     
 
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    clock.tick(60)  # limits FPS to 60
+    clock.tick(360)  # limits FPS to 60
 
 pygame.quit()  
