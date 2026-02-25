@@ -20,6 +20,16 @@ space.debug_draw(options)
 THICKNESS = 5
 ball_held = False
 
+#TODO: create a way to add more balls to the sim
+
+
+def create_ball(x,y):
+    ball = pymunk.Body(10,10,body_type= pymunk.Body.DYNAMIC)
+    ball_shape = pymunk.Circle(ball,25,offset=(0,0))
+    ball.position = x,y
+    ball_shape.elasticity = 0.9
+    space.add(ball,ball_shape)
+
 
 def create_borders(width,height):
     body = space.static_body
@@ -46,12 +56,18 @@ space.add(ball,ball_shape)
 timer = 0
 
 while running:
-    dt = 1/360
+    dt = 1/120
     space.step(dt)
     timer += dt
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_k:
+                _x,_y = pygame.mouse.get_pos()
+                create_ball(_x,_y)
+                
 
         if event.type == pygame.QUIT:
             running = False
@@ -98,6 +114,6 @@ while running:
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    clock.tick(360)  # limits FPS to 60
+    clock.tick(120)  # limits FPS to 60
 
 pygame.quit()  
